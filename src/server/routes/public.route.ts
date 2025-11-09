@@ -9,6 +9,21 @@ import {
   formeHumorInput,
   formePresentationInput,
 } from "../schemas/admin.schema";
+import { pipeline } from '@xenova/transformers';
+
+class SentimentPipeline {
+  static task = 'sentiment-analysis'as const;
+  static model = 'Xenova/distilbert-base-multilingual-cased-sentiments-student';
+  static instance: Promise<any> | null = null;
+
+  static async getInstance() {
+    if (this.instance === null) {
+      console.log('Initializing sentiment analysis model... (This may take a minute)');
+      this.instance = pipeline(this.task, this.model);
+    }
+    return this.instance;
+  }
+}
 
 export const publicRoutes = new Hono()
   .put(
@@ -80,4 +95,35 @@ export const publicRoutes = new Hono()
   .get("/allFlags", async (c) => {
     const allFlags = await db.query.featureFlags.findMany();
     return c.json(allFlags[0], 200);
-  });
+  })
+  .post('/sentiment', async (c) => {
+    const { text } = await c.req.json<{ text: string }>();
+    
+
+    if (!text) {
+        return c.json({ error: 'Text is required' }, 400);
+    }
+
+    try {
+        const analyze: any = await SentimentPipeline.getInstance();
+
+        const result = await analyze(text, {
+        topk: 1
+        });
+
+        const topResult = result[0];
+
+        if (!topResult) {
+        throw new Error('Analysis failed');
+        }
+
+        return c.json(topResult);
+
+    } catch (err: any) {
+        console.error('Sentiment analysis error:', err);
+        if (err.message && (err.message.includes('loading') || err.message.includes('Promise'))) {
+        return c.json({ error: 'wait...' }, 503); 
+        }
+        return c.json({ error: 'Internal server error', detail: err.message }, 500);
+    }
+    });
