@@ -20,10 +20,13 @@ import {
   radioQuestions,
   ratingOptions,
 } from "./constants/form";
+import { useCreativeMeltdown } from "./hooks/useCreativeMeltdown";
+import { useDevilHumorOverride } from "./hooks/useDevilHumorOverride";
 import {
   HAND_PRESS_DELTA,
   useHandGuidedBoldness,
 } from "./hooks/useHandGuidedBoldness";
+import { usePresentationAutoCount } from "./hooks/usePresentationAutoCount";
 
 export default function Page() {
   const [lastSubmit, setLastSubmit] = useState<FormValues | null>(null);
@@ -45,9 +48,40 @@ export default function Page() {
     handInPlace,
     handPosition,
     handPressing,
-    isBlockingInteractions,
+    isBlockingInteractions: isHandBlocking,
     tapRipplePosition,
   } = useHandGuidedBoldness({ setValue });
+
+  const {
+    devilImage,
+    devilPosition,
+    handleHumorOverride,
+    humorFiveRef,
+    humorQuestionRef,
+    isBlockingInteractions: isDevilBlocking,
+    tapRipplePosition: devilTapRipplePosition,
+  } = useDevilHumorOverride({ setValue });
+
+  const {
+    creativityFiveRef,
+    handleCreativityOverride,
+    isBlockingInteractions: isCreativityBlocking,
+    meltingOption,
+    tapRipplePosition: creativityTapRipplePosition,
+  } = useCreativeMeltdown({ setValue });
+
+  const {
+    handlePresentationOverride,
+    isBlockingInteractions: isPresentationBlocking,
+    registerPresentationRef,
+    tapRipplePosition: presentationTapRipplePosition,
+  } = usePresentationAutoCount({ setValue });
+
+  const isBlockingInteractions =
+    isHandBlocking ||
+    isDevilBlocking ||
+    isCreativityBlocking ||
+    isPresentationBlocking;
 
   const onSubmit = async (values: FormValues) => {
     await new Promise((resolve) => setTimeout(resolve, 600));
@@ -70,6 +104,45 @@ export default function Page() {
           style={{
             top: `${tapRipplePosition.top}px`,
             left: `${tapRipplePosition.left}px`,
+            zIndex: 45,
+          }}
+        >
+          <span className="tap-pulse" />
+        </div>
+      ) : null}
+      {devilTapRipplePosition ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed"
+          style={{
+            top: `${devilTapRipplePosition.top}px`,
+            left: `${devilTapRipplePosition.left}px`,
+            zIndex: 45,
+          }}
+        >
+          <span className="tap-pulse" />
+        </div>
+      ) : null}
+      {creativityTapRipplePosition ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed"
+          style={{
+            top: `${creativityTapRipplePosition.top}px`,
+            left: `${creativityTapRipplePosition.left}px`,
+            zIndex: 45,
+          }}
+        >
+          <span className="tap-pulse" />
+        </div>
+      ) : null}
+      {presentationTapRipplePosition ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed"
+          style={{
+            top: `${presentationTapRipplePosition.top}px`,
+            left: `${presentationTapRipplePosition.left}px`,
             zIndex: 45,
           }}
         >
@@ -105,6 +178,27 @@ export default function Page() {
             src="/hand.PNG"
             width={2500}
             height={2500}
+          />
+        </div>
+      ) : null}
+      {devilPosition ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed z-40"
+          style={{
+            top: `${devilPosition.top}px`,
+            left: `${devilPosition.left}px`,
+          }}
+        >
+          <Image
+            alt=""
+            className="pointer-events-none w-auto select-none"
+            draggable={false}
+            height={300}
+            src={
+              devilImage === "before" ? "/devil-before.PNG" : "/devil-after.PNG"
+            }
+            width={300}
           />
         </div>
       ) : null}
@@ -190,6 +284,7 @@ export default function Page() {
               className={`rounded-2xl border bg-white p-6 ${
                 errors[question.name] ? "border-[#d93025]" : "border-[#dadce0]"
               }`}
+              ref={question.name === "humor" ? humorQuestionRef : undefined}
             >
               <div className="flex items-center text-base font-semibold text-[#202124]">
                 {question.label}
@@ -198,17 +293,48 @@ export default function Page() {
               <p className="mt-1 text-sm text-[#5f6368]">{question.helper}</p>
               <div className="mt-4 space-y-3">
                 {ratingOptions.map((option) => {
-                  const registerProps =
-                    question.name === "boldness"
-                      ? register(question.name, {
-                          onChange: handleBoldnessOverride,
-                        })
-                      : register(question.name);
+                  const registerProps = (() => {
+                    if (question.name === "boldness") {
+                      return register(question.name, {
+                        onChange: handleBoldnessOverride,
+                      });
+                    }
+                    if (question.name === "humor") {
+                      return register(question.name, {
+                        onChange: handleHumorOverride,
+                      });
+                    }
+                    if (question.name === "creativity") {
+                      return register(question.name, {
+                        onChange: handleCreativityOverride,
+                      });
+                    }
+                    if (question.name === "presentation") {
+                      return register(question.name, {
+                        onChange: handlePresentationOverride,
+                      });
+                    }
+                    return register(question.name);
+                  })();
+
+                  const labelClassNames = [
+                    "flex items-center gap-3 text-[#202124]",
+                  ];
+                  if (question.name === "creativity") {
+                    labelClassNames.push("creativity-option");
+                    if (meltingOption) {
+                      if (option.value === meltingOption) {
+                        labelClassNames.push("creativity-option--melting");
+                      } else if (option.value !== "5") {
+                        labelClassNames.push("creativity-option--fading");
+                      }
+                    }
+                  }
 
                   return (
                     <label
                       key={option.value}
-                      className="flex items-center gap-3 text-[#202124]"
+                      className={labelClassNames.join(" ")}
                     >
                       <input
                         className={`h-4 w-4 border-2 text-[#673ab7] focus:ring-[#673ab7] ${
@@ -226,6 +352,21 @@ export default function Page() {
                             option.value === "5"
                           ) {
                             boldnessFiveRef.current = node;
+                          }
+                          if (
+                            question.name === "humor" &&
+                            option.value === "5"
+                          ) {
+                            humorFiveRef.current = node;
+                          }
+                          if (
+                            question.name === "creativity" &&
+                            option.value === "5"
+                          ) {
+                            creativityFiveRef.current = node;
+                          }
+                          if (question.name === "presentation") {
+                            registerPresentationRef(option.value, node);
                           }
                         }}
                       />
@@ -316,3 +457,4 @@ export default function Page() {
     </main>
   );
 }
+
