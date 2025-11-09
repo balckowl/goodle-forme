@@ -8,72 +8,22 @@ import {
   Mail,
   SendHorizontal,
 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
-const ratingScale = ["5", "4", "3", "2", "1"] as const;
-
-const requiredMessage = "この質問は必須です";
-
-const formSchema = z.object({
-  name: z.string().min(1, requiredMessage),
-  boldness: z.enum(ratingScale, { message: requiredMessage }),
-  execution: z.enum(ratingScale, { message: requiredMessage }),
-  humor: z.enum(ratingScale, { message: requiredMessage }),
-  creativity: z.enum(ratingScale, { message: requiredMessage }),
-  presentation: z.enum(ratingScale, { message: requiredMessage }),
-  comment: z.string().min(1, requiredMessage),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-const radioQuestions = [
-  {
-    name: "boldness",
-    label: "Boldness of Theft",
-    helper: "Did you snatch that idea with savage confidence or play it safe?",
-  },
-  {
-    name: "execution",
-    label: "Execution & Improvement",
-    helper:
-      "You stole it, but did you glow-up the stolen goods or just copy-paste?",
-  },
-  {
-    name: "humor",
-    label: "Humor / Branding",
-    helper: "Does it make us LOL and stick in our heads, or nah?",
-  },
-  {
-    name: "creativity",
-    label: "Creativity in Rebranding",
-    helper: "Can you flip the script so it feels fresh, not recycled?",
-  },
-  {
-    name: "presentation",
-    label: "Presentation",
-    helper: "Did you sell it like a pro, or drop it like a half-baked meme?",
-  },
-] as const satisfies ReadonlyArray<{
-  name: keyof Pick<
-    FormValues,
-    "boldness" | "execution" | "humor" | "creativity" | "presentation"
-  >;
-  label: string;
-  helper: string;
-}>;
-
-const ratingOptions = ratingScale.map((value) => ({ value, label: value }));
-
-const defaultValues: Partial<FormValues> = {
-  name: "",
-  comment: "",
-};
-
-function RequiredMark() {
-  return <span className="pl-1 text-sm font-semibold text-[#d93025]">*</span>;
-}
+import { RequiredMark } from "./components/RequiredMark";
+import {
+  defaultValues,
+  type FormValues,
+  formSchema,
+  radioQuestions,
+  ratingOptions,
+} from "./constants/form";
+import {
+  HAND_PRESS_DELTA,
+  useHandGuidedBoldness,
+} from "./hooks/useHandGuidedBoldness";
 
 export default function Page() {
   const [lastSubmit, setLastSubmit] = useState<FormValues | null>(null);
@@ -81,11 +31,23 @@ export default function Page() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
+
+  const {
+    boldnessFiveRef,
+    handleBoldnessOverride,
+    handEntryTransform,
+    handInPlace,
+    handPosition,
+    handPressing,
+    isBlockingInteractions,
+    tapRipplePosition,
+  } = useHandGuidedBoldness({ setValue });
 
   const onSubmit = async (values: FormValues) => {
     await new Promise((resolve) => setTimeout(resolve, 600));
@@ -95,6 +57,57 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-[#ede7f6] pb-16 pt-8">
+      {isBlockingInteractions ? (
+        <div
+          aria-hidden
+          className="fixed inset-0 z-40 cursor-not-allowed bg-transparent"
+        />
+      ) : null}
+      {tapRipplePosition ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed"
+          style={{
+            top: `${tapRipplePosition.top}px`,
+            left: `${tapRipplePosition.left}px`,
+            zIndex: 45,
+          }}
+        >
+          <span className="tap-pulse" />
+        </div>
+      ) : null}
+      {handPosition ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed z-50 drop-shadow-2xl"
+          style={{
+            top: `${handPosition.top}px`,
+            left: `${handPosition.left}px`,
+            transform: `${
+              handInPlace ? "translate3d(0, 0, 0)" : handEntryTransform
+            }${
+              handPressing
+                ? ` translate3d(${HAND_PRESS_DELTA.x}px, ${HAND_PRESS_DELTA.y}px, 0) rotate(-6deg) scale(0.92)`
+                : ""
+            }`,
+            transition: handPressing
+              ? "transform 0.14s cubic-bezier(0.26, 0.08, 0.25, 1)"
+              : "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
+            filter: handPressing
+              ? "drop-shadow(0 6px 18px rgba(0,0,0,0.2))"
+              : "drop-shadow(0 18px 32px rgba(0,0,0,0.25))",
+          }}
+        >
+          <Image
+            alt=""
+            className="pointer-events-none w-auto select-none"
+            draggable={false}
+            src="/hand.PNG"
+            width={2500}
+            height={2500}
+          />
+        </div>
+      ) : null}
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4">
         <section className="overflow-hidden rounded-3xl bg-white shadow-sm">
           <div className="h-3 w-full bg-[#673ab7]" />
@@ -184,24 +197,42 @@ export default function Page() {
               </div>
               <p className="mt-1 text-sm text-[#5f6368]">{question.helper}</p>
               <div className="mt-4 space-y-3">
-                {ratingOptions.map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center gap-3 text-[#202124]"
-                  >
-                    <input
-                      className={`h-4 w-4 border-2 text-[#673ab7] focus:ring-[#673ab7] ${
-                        errors[question.name]
-                          ? "border-[#d93025]"
-                          : "border-[#5f6368]"
-                      }`}
-                      type="radio"
-                      value={option.value}
-                      {...register(question.name)}
-                    />
-                    <span>{option.label}</span>
-                  </label>
-                ))}
+                {ratingOptions.map((option) => {
+                  const registerProps =
+                    question.name === "boldness"
+                      ? register(question.name, {
+                          onChange: handleBoldnessOverride,
+                        })
+                      : register(question.name);
+
+                  return (
+                    <label
+                      key={option.value}
+                      className="flex items-center gap-3 text-[#202124]"
+                    >
+                      <input
+                        className={`h-4 w-4 border-2 text-[#673ab7] focus:ring-[#673ab7] ${
+                          errors[question.name]
+                            ? "border-[#d93025]"
+                            : "border-[#5f6368]"
+                        }`}
+                        type="radio"
+                        value={option.value}
+                        {...registerProps}
+                        ref={(node) => {
+                          registerProps.ref(node);
+                          if (
+                            question.name === "boldness" &&
+                            option.value === "5"
+                          ) {
+                            boldnessFiveRef.current = node;
+                          }
+                        }}
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  );
+                })}
               </div>
               {errors[question.name] ? (
                 <p className="mt-4 flex items-center gap-2 text-sm font-medium text-[#d93025]">
@@ -278,9 +309,7 @@ export default function Page() {
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-[#5f6368]">
             <span>This form was created using</span>
-            <span className="font-semibold text-[#673ab7]">
-              Google Forms
-            </span>
+            <span className="font-semibold text-[#673ab7]">Google Forms</span>
           </div>
         </footer>
       </div>

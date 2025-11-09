@@ -1,1 +1,30 @@
 @import "tailwindcss";
+
+@layer utilities {
+  @keyframes tap-pulse {
+    0% {
+      transform: translate(-50%, -50%) scale(0.35);
+      opacity: 0.75;
+    }
+    60% {
+      opacity: 0.35;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.35);
+      opacity: 0;
+    }
+  }
+
+  .tap-pulse {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 9999px;
+    border: 2px solid #673ab7;
+    pointer-events: none;
+    animation: tap-pulse 700ms ease-out forwards;
+  }
+}
