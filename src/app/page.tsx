@@ -1,17 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
   CheckCircle2,
   CloudCheck,
   Mail,
+  MousePointer,
   SendHorizontal,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
 import { RequiredMark } from "./components/RequiredMark";
 import {
   defaultValues,
@@ -26,6 +27,7 @@ import {
   HAND_PRESS_DELTA,
   useHandGuidedBoldness,
 } from "./hooks/useHandGuidedBoldness";
+import { useMousePointerAnimation } from "./hooks/useMousePointerAnimation";
 import { usePresentationAutoCount } from "./hooks/usePresentationAutoCount";
 
 export default function Page() {
@@ -51,6 +53,17 @@ export default function Page() {
     isBlockingInteractions: isHandBlocking,
     tapRipplePosition,
   } = useHandGuidedBoldness({ setValue });
+
+  const {
+    button5Ref,
+    triggerAnimation,
+    controls,
+    isVisible,
+    isBlockingInteractions: isPointerBlocking,
+  } = useMousePointerAnimation({
+    setValue,
+    fieldName: "execution",
+  });
 
   const {
     devilImage,
@@ -92,6 +105,12 @@ export default function Page() {
   return (
     <main className="min-h-screen bg-[#ede7f6] pb-16 pt-8">
       {isBlockingInteractions ? (
+        <div
+          aria-hidden
+          className="fixed inset-0 z-40 cursor-not-allowed bg-transparent"
+        />
+      ) : null}
+      {isPointerBlocking ? (
         <div
           aria-hidden
           className="fixed inset-0 z-40 cursor-not-allowed bg-transparent"
@@ -202,6 +221,26 @@ export default function Page() {
           />
         </div>
       ) : null}
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            key="mouse-pointer"
+            style={{
+              position: "fixed",
+              zIndex: 9999,
+              pointerEvents: "none",
+              transformOrigin: "top left",
+            }}
+            animate={controls}
+          >
+            <MousePointer
+              size={24}
+              color="#0078d4"
+              style={{ filter: "drop-shadow(0 0 3px #fff)" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4">
         <section className="overflow-hidden rounded-3xl bg-white shadow-sm">
           <div className="h-3 w-full bg-[#673ab7]" />
@@ -367,6 +406,11 @@ export default function Page() {
                           }
                           if (question.name === "presentation") {
                             registerPresentationRef(option.value, node);
+                          } else if (
+                            question.name === "execution" &&
+                            option.value === "5"
+                          ) {
+                            button5Ref.current = node;
                           }
                         }}
                       />
@@ -457,4 +501,3 @@ export default function Page() {
     </main>
   );
 }
-
