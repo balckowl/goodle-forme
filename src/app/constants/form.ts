@@ -1,3 +1,4 @@
+import type { DefaultValues } from "react-hook-form";
 import { z } from "zod";
 
 export const ratingScale = ["5", "4", "3", "2", "1"] as const;
@@ -11,7 +12,7 @@ export const formSchema = z.object({
   humor: z.enum(ratingScale, { message: requiredMessage }),
   creativity: z.enum(ratingScale, { message: requiredMessage }),
   presentation: z.enum(ratingScale, { message: requiredMessage }),
-  comment: z.string().min(1, requiredMessage),
+  comment: z.string(),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
@@ -57,7 +58,12 @@ export const ratingOptions = ratingScale.map((value) => ({
   label: value,
 }));
 
-export const defaultValues: Partial<FormValues> = {
+export const defaultValues: DefaultValues<FormValues> = {
   name: "",
+  boldness: undefined,
+  execution: undefined,
+  humor: undefined,
+  creativity: undefined,
+  presentation: undefined,
   comment: "",
 };
