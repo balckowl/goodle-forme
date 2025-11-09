@@ -24,23 +24,23 @@ const deriveFlagState = (source: FeatureFlags): FlagState =>
 
 const flagMutations: Record<FlagKey, (value: boolean) => Promise<Response>> = {
   isFormeBoldness: (value) =>
-    hono.api.isFormeBoldness.$put({
+    hono.api.isformeboldness.$put({
       json: { isFormeBoldness: value },
     }),
   isFormeExecution: (value) =>
-    hono.api.isFormeExecution.$put({
+    hono.api.isformeexecution.$put({
       json: { isFormeExecution: value },
     }),
   isFormeHumor: (value) =>
-    hono.api.isFormeHumor.$put({
+    hono.api.isformehumor.$put({
       json: { isFormeHumor: value },
     }),
   isFormeCreativity: (value) =>
-    hono.api.isFormeCreativity.$put({
+    hono.api.isformecreativity.$put({
       json: { isFormeCreativity: value },
     }),
   isFormePresentation: (value) =>
-    hono.api.isFormePresentation.$put({
+    hono.api.isformepresentation.$put({
       json: { isFormePresentation: value },
     }),
 };
@@ -92,8 +92,8 @@ export default function AdminWrapper({
               Magical Power
             </p>
             <p className="text-sm text-[#5f6368]">
-              Turn on the section you want to give the highest rating.
-              You can force it to be the highest rating.
+              Turn on the section you want to give the highest rating. You can
+              force it to be the highest rating.
             </p>
           </header>
           <div className="flex flex-wrap gap-4">
@@ -140,4 +140,3 @@ export default function AdminWrapper({
     </main>
   );
 }
-

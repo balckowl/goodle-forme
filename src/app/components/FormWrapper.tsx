@@ -206,11 +206,13 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
           style={{
             top: `${handPosition.top}px`,
             left: `${handPosition.left}px`,
-            transform: `${handInPlace ? "translate3d(0, 0, 0)" : handEntryTransform
-              }${handPressing
+            transform: `${
+              handInPlace ? "translate3d(0, 0, 0)" : handEntryTransform
+            }${
+              handPressing
                 ? ` translate3d(${HAND_PRESS_DELTA.x}px, ${HAND_PRESS_DELTA.y}px, 0) rotate(-6deg) scale(0.92)`
                 : ""
-              }`,
+            }`,
             transition: handPressing
               ? "transform 0.14s cubic-bezier(0.26, 0.08, 0.25, 1)"
               : "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -327,18 +329,21 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <article
-            className={`rounded-xl border bg-white p-6 ${errors.name ? "border-[#d93025]" : "border-[#dadce0]"
-              }`}
+            className={`rounded-xl border bg-white p-6 ${
+              errors.name ? "border-[#d93025]" : "border-[#dadce0]"
+            }`}
           >
             <label
               className="flex items-center text-base font-semibold text-[#202124]"
               htmlFor="name"
             >
-              Your name<RequiredMark />
+              Your name
+              <RequiredMark />
             </label>
             <input
-              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${errors.name ? "border-b-[#d93025]" : "border-b-[#dadce0]"
-                }`}
+              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${
+                errors.name ? "border-b-[#d93025]" : "border-b-[#dadce0]"
+              }`}
               id="name"
               type="text"
               placeholder="Your answer"
@@ -355,8 +360,9 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
           {radioQuestions.map((question) => (
             <article
               key={question.name}
-              className={`rounded-xl border bg-white p-6 ${errors[question.name] ? "border-[#d93025]" : "border-[#dadce0]"
-                }`}
+              className={`rounded-xl border bg-white p-6 ${
+                errors[question.name] ? "border-[#d93025]" : "border-[#dadce0]"
+              }`}
               ref={question.name === "humor" ? humorQuestionRef : undefined}
             >
               <div className="flex items-center text-base font-semibold text-[#202124]">
@@ -416,10 +422,11 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
                       className={labelClassNames.join(" ")}
                     >
                       <input
-                        className={`h-4 w-4 border-2 text-[#673ab7] focus:ring-[#673ab7] ${errors[question.name]
-                          ? "border-[#d93025]"
-                          : "border-[#5f6368]"
-                          }`}
+                        className={`h-4 w-4 border-2 text-[#673ab7] focus:ring-[#673ab7] ${
+                          errors[question.name]
+                            ? "border-[#d93025]"
+                            : "border-[#5f6368]"
+                        }`}
                         type="radio"
                         value={option.value}
                         {...registerProps}
@@ -468,8 +475,9 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
           ))}
 
           <article
-            className={`rounded-xl border bg-white p-6 ${errors.comment ? "border-[#d93025]" : "border-[#dadce0]"
-              }`}
+            className={`rounded-xl border bg-white p-6 ${
+              errors.comment ? "border-[#d93025]" : "border-[#dadce0]"
+            }`}
           >
             <label
               className="flex items-center text-base font-semibold text-[#202124]"
@@ -478,8 +486,9 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
               Additional comments
             </label>
             <input
-              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${errors.comment ? "border-b-[#d93025]" : "border-b-[#dadce0]"
-                }`}
+              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${
+                errors.comment ? "border-b-[#d93025]" : "border-b-[#dadce0]"
+              }`}
               id="comment"
               type="text"
               placeholder="Your answer"
@@ -545,4 +554,3 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
     </main>
   );
 }
-
