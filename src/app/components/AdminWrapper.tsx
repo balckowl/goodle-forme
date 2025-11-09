@@ -1,15 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { FeatureFlags } from "@/server/schemas/admin.schema";
 import { hono } from "../lib/hono-client";
 
 const flagDefinitions = [
-  { key: "isFormeBoldness", label: "is_forme_boldness" },
-  { key: "isFormeExecution", label: "is_forme_execution" },
-  { key: "isFormeHumor", label: "is_forme_humor" },
-  { key: "isFormeCreativity", label: "is_forme_creativity" },
-  { key: "isFormePresentation", label: "is_forme_presentation" },
+  { key: "isFormeBoldness", label: "Boldness of Theft" },
+  { key: "isFormeExecution", label: "Execution & Improvement" },
+  { key: "isFormeHumor", label: "Humor / Branding" },
+  { key: "isFormeCreativity", label: "Creativity in Rebranding" },
+  { key: "isFormePresentation", label: "Presentation" },
 ] as const;
 
 type FlagKey = (typeof flagDefinitions)[number]["key"];
@@ -84,42 +85,59 @@ export default function AdminWrapper({
 
   return (
     <main className="min-h-screen bg-[#ede7f6] p-8">
-      <section className="mx-auto max-w-5xl rounded-3xl border border-[#dadce0] bg-white p-8 shadow-sm">
-        <header className="mb-6">
-          <p className="text-lg font-semibold text-[#202124]">Feature Flags</p>
-          <p className="text-sm text-[#5f6368]">
-            Toggle each forme flag to preview the current state and sync with
-            the API.
-          </p>
-        </header>
-        <div className="flex flex-wrap gap-4">
-          {flagDefinitions.map(({ key, label }) => {
-            const isEnabled = flags[key];
-            return (
-              <article
-                key={key}
-                className="flex grow basis-64 items-center justify-between rounded-2xl border border-[#dadce0] px-4 py-3"
-              >
-                <span className="text-sm font-medium text-[#202124]">
-                  {label}
-                </span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={isEnabled}
-                  aria-label={label}
-                  onClick={() => handleToggle(key)}
-                  className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${isEnabled ? "bg-[#673ab7]" : "bg-[#ccd0d5]"}`}
+      <div className="mx-auto max-w-5xl">
+        <section className="rounded-xl border border-[#dadce0] bg-white p-8 mb-5">
+          <header className="mb-6">
+            <p className="text-lg font-semibold text-[#202124]">
+              Magical Power
+            </p>
+            <p className="text-sm text-[#5f6368]">
+              Turn on the section you want to give the highest rating.
+              You can force it to be the highest rating.
+            </p>
+          </header>
+          <div className="flex flex-wrap gap-4">
+            {flagDefinitions.map(({ key, label }) => {
+              const isEnabled = flags[key];
+              return (
+                <article
+                  key={key}
+                  className="flex grow basis-64 items-center justify-between rounded-2xl border border-[#dadce0] px-4 py-3"
                 >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${isEnabled ? "translate-x-5" : "translate-x-1"}`}
-                  />
-                </button>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+                  <span className="text-sm font-medium text-[#202124]">
+                    {label}
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isEnabled}
+                    aria-label={label}
+                    onClick={() => handleToggle(key)}
+                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${isEnabled ? "bg-[#673ab7]" : "bg-[#ccd0d5]"}`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${isEnabled ? "translate-x-5" : "translate-x-1"}`}
+                    />
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+        <Link
+          href="/"
+          className="inline-flex
+             cursor-pointer 
+             items-center 
+             gap-2 rounded-xl bg-[#673ab7] px-6 py-2 text-sm font-semibold
+            text-white transition
+            hover:bg-[#5e35b1] disabled:cursor-progress 
+            disabled:opacity-70"
+        >
+          <span>Back to form</span>
+        </Link>
+      </div>
     </main>
   );
 }
+

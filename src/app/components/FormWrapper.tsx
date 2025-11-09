@@ -2,17 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  AlertCircle,
-  CheckCircle2,
-  CloudCheck,
-  Mail,
-  MousePointer,
-  SendHorizontal,
-} from "lucide-react";
+import { AlertCircle, CloudCheck, Loader2, Mail, Pointer } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { FeatureFlags } from "@/server/schemas/admin.schema";
 import {
   defaultValues,
@@ -32,16 +26,17 @@ import { usePresentationAutoCount } from "../hooks/usePresentationAutoCount";
 import { RequiredMark } from "./RequiredMark";
 
 export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
-  const [lastSubmit, setLastSubmit] = useState<FormValues | null>(null);
   const {
     register,
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
+    mode: "onSubmit",
   });
 
   const {
@@ -114,14 +109,19 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
     (isFormeCreativity && isCreativityBlocking) ||
     (isFormePresentation && isPresentationBlocking);
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async () => {
     await new Promise((resolve) => setTimeout(resolve, 600));
-    setLastSubmit(values);
-    reset(values);
+    reset();
+    toast.success("Form submitted successfully.");
   };
+
+  const values = watch();
 
   return (
     <main className="min-h-screen bg-[#ede7f6] pb-16 pt-8">
+      <div aria-hidden style={{ display: "none" }}>
+        {JSON.stringify(values)}
+      </div>
       {isBlockingInteractions ? (
         <div
           aria-hidden
@@ -206,13 +206,11 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
           style={{
             top: `${handPosition.top}px`,
             left: `${handPosition.left}px`,
-            transform: `${
-              handInPlace ? "translate3d(0, 0, 0)" : handEntryTransform
-            }${
-              handPressing
+            transform: `${handInPlace ? "translate3d(0, 0, 0)" : handEntryTransform
+              }${handPressing
                 ? ` translate3d(${HAND_PRESS_DELTA.x}px, ${HAND_PRESS_DELTA.y}px, 0) rotate(-6deg) scale(0.92)`
                 : ""
-            }`,
+              }`,
             transition: handPressing
               ? "transform 0.14s cubic-bezier(0.26, 0.08, 0.25, 1)"
               : "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -264,18 +262,19 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
             }}
             animate={controls}
           >
-            <MousePointer
+            <Pointer
               size={24}
-              color="#0078d4"
+              color="black"
+              fill="white"
               style={{ filter: "drop-shadow(0 0 3px #fff)" }}
             />
           </motion.div>
         )}
       </AnimatePresence>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4">
-        <section className="overflow-hidden rounded-3xl bg-white shadow-sm">
+        <section className="overflow-hidden rounded-xl bg-white">
           <div className="h-3 w-full bg-[#673ab7]" />
-          <div className="space-y-6 px-8 pb-8 pt-6">
+          <div className="space-y-5 px-8 pb-8 pt-6">
             <header className="space-y-2">
               <h1 className="text-3xl font-semibold text-[#202124]">
                 Maximally Steal-A-Thon Judging Form
@@ -306,38 +305,43 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
                 </div>
               </div>
             </div>
+            <button type="button">
+              <Link
+                href="/admin"
+                className="inline-flex
+                cursor-pointer 
+                items-center 
+                gap-2 rounded-xl bg-[#673ab7] px-6 py-2 text-sm font-semibold
+                text-white transition
+                hover:bg-[#5e35b1] disabled:cursor-progress 
+                disabled:opacity-70"
+              >
+                <span>Go to setting</span>
+              </Link>
+            </button>
             <p className="text-sm font-semibold text-[#d93025]">
               * Indicates required question
             </p>
           </div>
         </section>
 
-        {lastSubmit ? (
-          <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm text-[#202124] shadow">
-            <CheckCircle2 className="text-[#188038]" size={18} />
-            <span>Thanks {lastSubmit.name}! フォームを送信しました。</span>
-          </div>
-        ) : null}
-
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <article
-            className={`rounded-2xl border bg-white p-6 ${
-              errors.name ? "border-[#d93025]" : "border-[#dadce0]"
-            }`}
+            className={`rounded-xl border bg-white p-6 ${errors.name ? "border-[#d93025]" : "border-[#dadce0]"
+              }`}
           >
             <label
               className="flex items-center text-base font-semibold text-[#202124]"
               htmlFor="name"
             >
-              What is your name ?<RequiredMark />
+              Your name<RequiredMark />
             </label>
             <input
-              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${
-                errors.name ? "border-b-[#d93025]" : "border-b-[#dadce0]"
-              }`}
+              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${errors.name ? "border-b-[#d93025]" : "border-b-[#dadce0]"
+                }`}
               id="name"
               type="text"
-              placeholder="Enter your answer"
+              placeholder="Your answer"
               {...register("name")}
             />
             {errors.name ? (
@@ -351,9 +355,8 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
           {radioQuestions.map((question) => (
             <article
               key={question.name}
-              className={`rounded-2xl border bg-white p-6 ${
-                errors[question.name] ? "border-[#d93025]" : "border-[#dadce0]"
-              }`}
+              className={`rounded-xl border bg-white p-6 ${errors[question.name] ? "border-[#d93025]" : "border-[#dadce0]"
+                }`}
               ref={question.name === "humor" ? humorQuestionRef : undefined}
             >
               <div className="flex items-center text-base font-semibold text-[#202124]">
@@ -413,11 +416,10 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
                       className={labelClassNames.join(" ")}
                     >
                       <input
-                        className={`h-4 w-4 border-2 text-[#673ab7] focus:ring-[#673ab7] ${
-                          errors[question.name]
-                            ? "border-[#d93025]"
-                            : "border-[#5f6368]"
-                        }`}
+                        className={`h-4 w-4 border-2 text-[#673ab7] focus:ring-[#673ab7] ${errors[question.name]
+                          ? "border-[#d93025]"
+                          : "border-[#5f6368]"
+                          }`}
                         type="radio"
                         value={option.value}
                         {...registerProps}
@@ -466,24 +468,21 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
           ))}
 
           <article
-            className={`rounded-2xl border bg-white p-6 ${
-              errors.comment ? "border-[#d93025]" : "border-[#dadce0]"
-            }`}
+            className={`rounded-xl border bg-white p-6 ${errors.comment ? "border-[#d93025]" : "border-[#dadce0]"
+              }`}
           >
             <label
               className="flex items-center text-base font-semibold text-[#202124]"
               htmlFor="comment"
             >
-              Comment
-              <RequiredMark />
+              Additional comments
             </label>
             <input
-              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${
-                errors.comment ? "border-b-[#d93025]" : "border-b-[#dadce0]"
-              }`}
+              className={`mt-4 w-full border-0 border-b-2 bg-transparent px-0 py-2 text-lg text-[#202124] focus:border-b-[#673ab7] focus:outline-none ${errors.comment ? "border-b-[#d93025]" : "border-b-[#dadce0]"
+                }`}
               id="comment"
               type="text"
-              placeholder="Enter your answer"
+              placeholder="Your answer"
               {...register("comment")}
             />
             {errors.comment ? (
@@ -494,47 +493,56 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
             ) : null}
           </article>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white px-6 py-5">
+          <div className="flex items-center justify-between">
             <button
-              className="inline-flex items-center gap-2 rounded bg-[#673ab7] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#5e35b1] disabled:cursor-progress disabled:opacity-70"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#673ab7] px-6 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#5e35b1] disabled:cursor-progress disabled:opacity-70"
               type="submit"
               disabled={isSubmitting}
             >
-              <SendHorizontal size={16} />
-              {isSubmitting ? "Submitting…" : "Submit"}
+              {isSubmitting && <Loader2 className="animate-spin" size={14} />}
+              Submit
             </button>
             <button
-              className="text-sm font-semibold text-[#673ab7]"
+              className="text-sm cursor-pointer font-semibold text-[#673ab7]"
               type="button"
-              onClick={() => reset(defaultValues)}
+              onClick={() => reset()}
             >
               Clear form
             </button>
           </div>
         </form>
 
-        <footer className="space-y-4 rounded-2xl bg-transparent px-4 py-6 text-center text-xs text-[#5f6368]">
-          <p>Never submit passwords through Google Forms.</p>
-          <p>
-            This content is neither created nor endorsed by Google.
-            <a className="px-1 text-[#1a73e8]" href="/">
-              Report abuse
-            </a>
-            -
-            <a className="px-1 text-[#1a73e8]" href="/">
+        <footer className="space-y-2 rounded-2xl bg-transparent px-4 py-8 text-center text-xs text-[#5f6368]">
+          <p className="text-xs text-start font-medium leading-snug">
+            Never submit passwords through Goodgle Forme.
+          </p>
+          <p className="text-xs leading-snug">
+            This content is neither created nor endorsed by Goodgle Forme.{" "}
+            <span className="text-[#202124]">-</span>{" "}
+            <a className="font-medium text-[#5f6368] underline" href="/">
+              Contact form owner
+            </a>{" "}
+            <span className="text-[#202124]">-</span>{" "}
+            <a className="font-medium text-[#5f6368] underline" href="/">
               Terms of Service
-            </a>
-            -
-            <a className="px-1 text-[#1a73e8]" href="/">
+            </a>{" "}
+            <span className="text-[#202124]">-</span>{" "}
+            <a className="font-medium text-[#5f6368] underline" href="/">
               Privacy Policy
             </a>
           </p>
-          <div className="flex items-center justify-center gap-2 text-sm text-[#5f6368]">
-            <span>This form was created using</span>
-            <span className="font-semibold text-[#673ab7]">Google Forms</span>
+          <p className="text-xs leading-snug">
+            Does this form look suspicious?{" "}
+            <a className="font-medium text-[#5f6368] underline" href="/">
+              Report
+            </a>
+          </p>
+          <div className="pt-1 text-2xl font-medium text-[#5f6368]">
+            Goodgle Forme
           </div>
         </footer>
       </div>
     </main>
   );
 }
+
