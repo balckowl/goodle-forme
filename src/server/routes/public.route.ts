@@ -79,10 +79,12 @@ export const publicRoutes = new Hono()
   )
   .get("/allFlags", async (c) => {
     const allFlags = await db.query.featureFlags.findMany();
-    const flags = allFlags[0]
+    const flags = allFlags[0];
 
-
-    return c.json({ 
-      ...flags
-    }, 200);
+    return c.json(
+      {
+        ...flags,
+      },
+      200,
+    );
   });

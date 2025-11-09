@@ -92,8 +92,8 @@ export default function AdminWrapper({
               Magical Power
             </p>
             <p className="text-sm text-[#5f6368]">
-              Turn on the section you want to give the highest rating.
-              You can force it to be the highest rating.
+              Turn on the section you want to give the highest rating. You can
+              force it to be the highest rating.
             </p>
           </header>
           <div className="flex flex-wrap gap-4">
@@ -140,4 +140,3 @@ export default function AdminWrapper({
     </main>
   );
 }
-
