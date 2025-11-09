@@ -24,23 +24,23 @@ const deriveFlagState = (source: FeatureFlags): FlagState =>
 
 const flagMutations: Record<FlagKey, (value: boolean) => Promise<Response>> = {
   isFormeBoldness: (value) =>
-    hono.api.isFormeBoldness.$put({
+    hono.api.isformeboldness.$put({
       json: { isFormeBoldness: value },
     }),
   isFormeExecution: (value) =>
-    hono.api.isFormeExecution.$put({
+    hono.api.isformeexecution.$put({
       json: { isFormeExecution: value },
     }),
   isFormeHumor: (value) =>
-    hono.api.isFormeHumor.$put({
+    hono.api.isformehumor.$put({
       json: { isFormeHumor: value },
     }),
   isFormeCreativity: (value) =>
-    hono.api.isFormeCreativity.$put({
+    hono.api.isformecreativity.$put({
       json: { isFormeCreativity: value },
     }),
   isFormePresentation: (value) =>
-    hono.api.isFormePresentation.$put({
+    hono.api.isformepresentation.$put({
       json: { isFormePresentation: value },
     }),
 };

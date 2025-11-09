@@ -11,7 +11,7 @@ import {
 } from "../schemas/admin.schema";
 
 export const publicRoutes = new Hono()
-  .get("/allFlags", async (c) => {
+  .get("/allflags", async (c) => {
     const allFlags = await db.query.featureFlags.findMany();
     console.log(allFlags[0])
     const flags = allFlags[0];
@@ -19,7 +19,7 @@ export const publicRoutes = new Hono()
     return c.json(flags,200);
   })
   .put(
-    "/isFormeBoldness",
+    "/isformeboldness",
     zValidator("json", formeBoldnessInput),
     async (c) => {
       const { isFormeBoldness } = c.req.valid("json");
@@ -33,7 +33,7 @@ export const publicRoutes = new Hono()
     },
   )
   .put(
-    "/isFormeExecution",
+    "/isformeexecution",
     zValidator("json", formeExecutionInput),
     async (c) => {
       const { isFormeExecution } = c.req.valid("json");
@@ -46,7 +46,7 @@ export const publicRoutes = new Hono()
       );
     },
   )
-  .put("/isFormeHumor", zValidator("json", formeHumorInput), async (c) => {
+  .put("/isformehumor", zValidator("json", formeHumorInput), async (c) => {
     const { isFormeHumor } = c.req.valid("json");
     await db.update(featureFlags).set({ isFormeHumor });
     return c.json(
@@ -57,7 +57,7 @@ export const publicRoutes = new Hono()
     );
   })
   .put(
-    "/isFormeCreativity",
+    "/isformecreativity",
     zValidator("json", formeCreativityInput),
     async (c) => {
       const { isFormeCreativity } = c.req.valid("json");
@@ -71,7 +71,7 @@ export const publicRoutes = new Hono()
     },
   )
   .put(
-    "/isFormePresentation",
+    "/isformepresentation",
     zValidator("json", formePresentationInput),
     async (c) => {
       const { isFormePresentation } = c.req.valid("json");
