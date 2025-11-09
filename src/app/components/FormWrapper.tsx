@@ -17,6 +17,7 @@ import {
 } from "../constants/form";
 import { useCreativeMeltdown } from "../hooks/useCreativeMeltdown";
 import { useDevilHumorOverride } from "../hooks/useDevilHumorOverride";
+import { useSentimentForm } from "../hooks/useSentimentForm";
 import {
   HAND_PRESS_DELTA,
   useHandGuidedBoldness,
@@ -24,6 +25,7 @@ import {
 import { useMousePointerAnimation } from "../hooks/useMousePointerAnimation";
 import { usePresentationAutoCount } from "../hooks/usePresentationAutoCount";
 import { RequiredMark } from "./RequiredMark";
+import { useState } from "react";
 
 export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
   const {
@@ -114,6 +116,19 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
     reset();
     toast.success("Form submitted successfully.");
   };
+
+  const [text, setText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleBlur = async () => {
+    if (isLoading || !text.trim()) {
+      return;
+    }
+    setIsLoading(true);
+    await useSentimentForm(text,setValue)
+    setIsLoading(false);
+  };
+
 
   const values = watch();
 
@@ -484,6 +499,8 @@ export default function FormWrapper({ flags }: { flags: FeatureFlags }) {
               type="text"
               placeholder="Your answer"
               {...register("comment")}
+              onChange={(e) => setText(e.target.value)}
+              onBlur={handleBlur}
             />
             {errors.comment ? (
               <p className="mt-4 flex items-center gap-2 text-sm font-medium text-[#d93025]">
