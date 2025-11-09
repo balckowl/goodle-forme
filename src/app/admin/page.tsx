@@ -1,18 +1,14 @@
+import { db } from "@/db";
 import AdminWrapper from "../components/AdminWrapper";
-import { hono } from "../lib/hono-client";
 
 export default async function Page() {
-  const res = await hono.api.allFlags.$get({
-    init: {
-      cache: "no-store",
-    },
-  },);
+  const allFlags = await db.query.featureFlags.findMany()
 
-  if (res.status !== 200) {
-    throw Error("何かの問題が発生しました。")
-  }
+  // if (res.status !== 200) {
+  //   throw Error("何かの問題が発生しました。")
+  // }
 
-  const flags = await res.json();
+  // const flags = await res.json();
 
   // const flags: FeatureFlags = {
   //   isFormeBoldness: true,
@@ -22,5 +18,5 @@ export default async function Page() {
   //   isFormePresentation: true,
   // };
 
-  return <AdminWrapper flags={flags} />;
+  return <AdminWrapper flags={allFlags[0]} />;
 }
