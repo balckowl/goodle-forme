@@ -2,7 +2,7 @@ import { db } from "@/db";
 import AdminWrapper from "../components/AdminWrapper";
 
 export default async function Page() {
-  const allFlags = await db.query.featureFlags.findMany()
+  const allFlags = await db.query.featureFlags.findMany();
 
   // if (res.status !== 200) {
   //   throw Error("何かの問題が発生しました。")
